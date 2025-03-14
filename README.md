@@ -43,6 +43,7 @@ bun install
 
 ```
 PUBLIC_TITEENI_API=https://peli.titeen.it
+PUBLIC_AUTHORIZATION_HEADER=JWT_TOKEN
 ```
 
 ### Development
