@@ -1,11 +1,11 @@
 import { authCookie, baseUrl } from '$lib/client'
 import type { RequestHandler } from '@sveltejs/kit'
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async (req) => {
   try {
-    const { x, y } = await request.json()
-    if (!x || !y) {
-      return new Response(JSON.stringify({ error: 'Missing x or y' }), {
+    const { x, y, token } = await req.request.json()
+    if (!x || !y || !token) {
+      return new Response(JSON.stringify({ error: 'Missing x, y or' }), {
         status: 400,
         headers: {
           'Content-Type': 'application/json'
@@ -15,7 +15,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
     const res = await fetch(`${baseUrl}/api/v1/state/map/pixels`, {
       headers: {
-        Cookie: authCookie,
+        Cookie: authCookie(token),
         'Content-Type': 'application/json'
       },
       credentials: 'include',

@@ -3,9 +3,11 @@
   import type { LocalPixel } from '$lib/types/LocalGame'
   import { Viewport } from 'pixi-viewport'
   import { Application, Container } from 'pixi.js'
-  import { game } from '../../states/game.svelte'
-  import { users } from '../../states/users.svelte'
+  import { game } from '../states/game.svelte'
+  import { users } from '../states/users.svelte'
   import Pixel from './Pixel.svelte'
+
+  let { token }: { token: string } = $props()
 
   let container: HTMLDivElement
 
@@ -72,10 +74,13 @@
       return
     }
 
-    claimPixel({
-      x: pixel.x,
-      y: pixel.y
-    })
+    claimPixel(
+      {
+        x: pixel.x,
+        y: pixel.y
+      },
+      token
+    )
   }
 </script>
 

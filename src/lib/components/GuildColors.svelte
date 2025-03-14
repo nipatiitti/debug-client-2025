@@ -7,8 +7,6 @@
     color: rgbToHex(value),
     key: parseInt(key)
   }))
-
-  console.log(colors)
 </script>
 
 <div class="absolute left-0 top-0 m-2 flex flex-col gap-2 rounded-lg bg-white p-2">

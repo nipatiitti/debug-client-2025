@@ -1,13 +1,24 @@
 import { authCookie, baseUrl } from '$lib/client'
 import type { PlayerSpawn, ServerPixel } from '$lib/types/Game'
 import type { RequestHandler } from '@sveltejs/kit'
+import { getTokenFromQuery } from '../apiUtils'
 
 // This way we can insert x-Authorization cookie and circumvent CORS
-export const GET: RequestHandler = async () => {
+export const GET: RequestHandler = async (req) => {
+  const token = getTokenFromQuery(req)
+  if (!token) {
+    return new Response(JSON.stringify({ error: 'No token provided' }), {
+      status: 400,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+  }
+
   try {
     const res = await fetch(`${baseUrl}/api/v1/state/map/pixels`, {
       headers: {
-        Cookie: authCookie
+        Cookie: authCookie(token)
       },
       credentials: 'include'
     })

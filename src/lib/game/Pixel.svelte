@@ -3,7 +3,7 @@
   import { rgbToNumber } from '$lib/utils/colors'
   import { PIXEL_SIZE, PixelTypes, RBG_COLORS } from '$lib/utils/constants'
   import { Container, Graphics, Text } from 'pixi.js'
-  import { users } from '../../states/users.svelte'
+  import { users } from '../states/users.svelte'
 
   let { pixel, container, onClick }: { pixel: LocalPixel; container: Container; onClick: (pixel: LocalPixel) => void } =
     $props()
@@ -51,7 +51,6 @@
       case PixelTypes.Spawn:
         text.text = `S${pixel.guild}`
         if (ownPixel) {
-          console.log(pixel)
           text.style.fill = '#ff0000'
         }
         break

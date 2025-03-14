@@ -1,35 +1,17 @@
 <script lang="ts">
-  import { getMap } from '$lib/client/map'
-  import { getUser } from '$lib/client/users'
-  import GuildColors from '$lib/components/GuildColors.svelte'
-  import Game from '$lib/game/Game.svelte'
-  import { game } from '../states/game.svelte'
-  import { users } from '../states/users.svelte'
+  import { goto } from '$app/navigation'
 
-  const initMap = async () => {
-    const map = await getMap()
+  let token = $state('')
 
-    game.playerSpawn = map.playerSpawn
-    game.pixels = map.pixels.map((row, rowIndex) =>
-      row.map((pixel, colIndex) => ({
-        ...pixel,
-        x: colIndex - map.playerSpawn.x,
-        y: rowIndex - map.playerSpawn.y
-      }))
-    )
+  const onSubmit = () => {
+    goto(`/${token}`)
   }
-
-  const initUserData = async () => {
-    const currentUser = await getUser()
-    users.currentUser = currentUser
-  }
-
-  $effect(() => {
-    initMap()
-    initUserData()
-  })
 </script>
 
-<Game />
-
-<GuildColors />
+<main class="container flex flex-col items-center justify-center">
+  <form on:submit|preventDefault={onSubmit} class="flex flex-col gap-2">
+    Gib token >:)
+    <input type="text" bind:value={token} class="rounded border border-gray-300 p-2" />
+    <button type="submit">Submit</button>
+  </form>
+</main>

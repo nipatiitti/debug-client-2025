@@ -1,10 +1,10 @@
 import { toast } from '@zerodevx/svelte-toast'
 
-export const claimPixel = async ({ x, y }: { x: number; y: number }) => {
+export const claimPixel = async ({ x, y }: { x: number; y: number }, token: string) => {
   try {
-    const res = await fetch('/api/pixel', {
+    const res = await fetch(`/api/pixel`, {
       method: 'POST',
-      body: JSON.stringify({ x, y }),
+      body: JSON.stringify({ x, y, token }),
       headers: {
         'Content-Type': 'application/json'
       }
