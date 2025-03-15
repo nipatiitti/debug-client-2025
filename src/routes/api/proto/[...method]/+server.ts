@@ -1,22 +1,5 @@
 import { authCookie, baseUrl } from '$lib/client'
-import grpc from '@grpc/grpc-js'
-import protoLoader from '@grpc/proto-loader'
 import type { RequestHandler } from '@sveltejs/kit'
-import path from 'node:path'
-
-const PROTO_PATH = path.join(import.meta.url, '../../../../../proto/game.proto').replace('file:', '')
-const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
-  keepCase: true,
-  longs: String,
-  enums: String,
-  defaults: true,
-  oneofs: true
-})
-const protoDescriptor = grpc.loadPackageDefinition(packageDefinition)
-const game = protoDescriptor.Game
-
-process.env.GRPC_TRACE = 'all'
-process.env.GRPC_VERBOSITY = 'DEBUG'
 
 export const POST: RequestHandler = async (event) => {
   const token = event.request.headers.get('token')

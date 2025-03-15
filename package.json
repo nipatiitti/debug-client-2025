@@ -9,7 +9,8 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "format": "prettier --write .",
-    "lint": "prettier --check ."
+    "lint": "prettier --check .",
+    "proto": "./generate-client.sh"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^3.0.0",
@@ -28,8 +29,6 @@
     "vite": "^5.0.3"
   },
   "dependencies": {
-    "@grpc/grpc-js": "^1.13.0",
-    "@grpc/proto-loader": "^0.7.13",
     "@types/google-protobuf": "^3.15.12",
     "@zerodevx/svelte-toast": "^0.9.6",
     "google-protobuf": "^3.21.4",

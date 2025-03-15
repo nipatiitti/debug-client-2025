@@ -1,10 +1,23 @@
 import { MONGO_URI } from '$env/static/private'
 import { MongoClient } from 'mongodb'
 
-if (!MONGO_URI) {
-  throw new Error('Please define the MONGO_URI environment variable inside .env')
+export let mongo: MongoClient | null = null
+export let db: ReturnType<MongoClient['db']> | null = null
+
+// Initialize connection function
+async function initMongo() {
+  if (!mongo) {
+    mongo = new MongoClient(MONGO_URI)
+    await mongo.connect()
+    db = mongo.db('titeenit')
+    console.log('Connected to MongoDB')
+  }
+  return { mongo, db }
 }
 
-export const mongo: MongoClient = await MongoClient.connect(MONGO_URI)
-export const db = mongo.db('titeenit')
-console.log('Connected to MongoDB')
+export const getDb = async () => {
+  if (!db) {
+    await initMongo()
+  }
+  return db!
+}
