@@ -11,7 +11,9 @@ export const renderPixel = ({ container, pixel, currentUserId, hovering, app }: 
     color: 0xff0000
   })
   g.rect(pixel.x * PIXEL_SIZE, pixel.y * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE)
-  g.fill(rgbToNumber(RBG_COLORS[(pixel.guild ?? 0) as PixelGuild]))
+
+  const guildColor = rgbToNumber(RBG_COLORS[(pixel.guild ?? 0) as PixelGuild])
+  g.fill(pixel.type === PixelTypes.MapBorder ? 0xffffff : guildColor)
 
   const ownPixel = pixel.owner === currentUserId
 
@@ -44,29 +46,25 @@ export const renderPixel = ({ container, pixel, currentUserId, hovering, app }: 
 
   const pt = pixel.type
   switch (pt) {
-    case PixelTypes.MapBorder:
-      text.text = 'B'
-      break
     case PixelTypes.Spawn:
       text.text = `S${pixel.guild}`
       if (ownPixel) {
         text.style.fill = '#ff0000'
       }
       break
-    case PixelTypes.FogOfWar:
-      text.text = 'X'
-      break
     default:
       text.text = ''
       break
   }
 
-  // Center text to pixel
-  text.anchor.set(0.5)
-  text.position.set(pixel.x * PIXEL_SIZE + PIXEL_SIZE / 2, pixel.y * PIXEL_SIZE + PIXEL_SIZE / 2)
-  // Add both graphics and text to container separately
   container.addChild(g)
-  container.addChild(text)
+  if (text.text !== '') {
+    // Center text to pixel
+    text.anchor.set(0.5)
+    text.position.set(pixel.x * PIXEL_SIZE + PIXEL_SIZE / 2, pixel.y * PIXEL_SIZE + PIXEL_SIZE / 2)
+    // Add both graphics and text to container separately
+    container.addChild(text)
+  }
 
   // Add highlight effect if needed
   if (pixel.highlight) {

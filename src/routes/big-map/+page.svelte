@@ -15,13 +15,7 @@
   <h1 class="my-4 text-4xl">Calculated {data.maps.length} maps</h1>
 
   {#each data.maps as map}
-    <div
-      class="m-4 h-[80vh] w-11/12 rounded-lg border-2 border-pink-600"
-      onscroll={(e) => {
-        e.preventDefault()
-        e.stopPropagation()
-      }}
-    >
+    <div class="m-4 h-[80vh] w-11/12 rounded-lg border-2 border-pink-600" on:wheel|preventDefault>
       <Game pixels={serverMapToLocalMap(map).pixels} />
     </div>
   {/each}

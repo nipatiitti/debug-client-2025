@@ -8,7 +8,15 @@
   import { users } from '../states/users.svelte'
   import { renderPixel } from './renderPixel'
 
-  let { token, pixels }: { token?: string; pixels: LocalPixel[][] } = $props()
+  let {
+    token,
+    pixels,
+    disableInteractions
+  }: {
+    token?: string
+    pixels: LocalPixel[][]
+    disableInteractions?: boolean
+  } = $props()
 
   let container: HTMLDivElement
 
@@ -45,7 +53,9 @@
         viewport.on('drag-start', handleDragStart)
         viewport.on('drag-end', handleDragEnd)
 
-        viewport.on('mousemove', handleMove)
+        if (disableInteractions) {
+          viewport.on('mousemove', handleMove)
+        }
 
         console.log('app initialized')
       })
