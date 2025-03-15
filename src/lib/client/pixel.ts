@@ -1,3 +1,4 @@
+import { miscState } from '$lib/states/misc.svelte'
 import { toast } from '@zerodevx/svelte-toast'
 
 export const claimPixel = async ({ x, y }: { x: number; y: number }, token: string) => {
@@ -22,6 +23,7 @@ export const claimPixel = async ({ x, y }: { x: number; y: number }, token: stri
 
     const data = await res.json()
     toast.push('Pixel claimed')
+    miscState.pixelBucket.amount -= 1
     return data
   } catch (error) {
     console.log(error)

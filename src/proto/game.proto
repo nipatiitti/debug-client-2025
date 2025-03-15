@@ -3,63 +3,71 @@ syntax = "proto3";
 package Game;
 
 service StateUpdate {
-  rpc GetIncrementalMapUpdate (IncrementalMapUpdateRequest) returns (stream IncrementalMapUpdateResponse) {}
-  rpc GetMiscGameStateUpdate (MiscStateUpdateRequest) returns (stream MiscStateUpdateResponse) {}
+  rpc GetIncrementalMapUpdate(IncrementalMapUpdateRequest) returns (stream IncrementalMapUpdateResponse) {}
+  rpc GetMiscGameStateUpdate(MiscStateUpdateRequest) returns (stream MiscStateUpdateResponse) {}
 }
 
-message IncrementalMapUpdateRequest {}
+
+
+message IncrementalMapUpdateRequest {
+  // Empty request
+}
 
 message IncrementalMapUpdateResponse {
-  repeated IncrementalMapUpdate updates = 1;
-  
   message IncrementalMapUpdate {
-    Coordinate spawnRelativeCoordinate = 1;
+    RelativeCoordinate spawnRelativeCoordinate = 1;
     PixelTypes type = 2;
     PixelGuild guild = 3;
-    User owner = 4;
+    PixelUser owner = 4;
     bytes backgroundGraphic = 5;
   }
+  
+  repeated IncrementalMapUpdate updates = 1;
 }
 
-message MiscStateUpdateRequest {}
+message MiscStateUpdateRequest {
+  // Empty request
+}
 
 message MiscStateUpdateResponse {
-  PixelBucket pixelBucket = 1;
-  repeated Scores scores = 2;
-  repeated PowerUps powerUps = 3;
-  Notification notification = 4;
-  bool powerupUpdate = 5;
-  
   message PixelBucket {
     uint32 amount = 1;
     uint32 maxAmount = 2;
     float increasePerMinute = 3;
   }
-  
+
   message Scores {
     PixelGuild guild = 1;
     uint32 amount = 2;
   }
-  
+
   message PowerUps {
     uint32 powerUpId = 1;
-    bool Directed = 2;
+    bool Directed = 2 [json_name = "Directed"];
     string name = 3;
     string description = 4;
   }
-  
+
   message Notification {
     string message = 1;
   }
+
+  PixelBucket pixelBucket = 1;
+  repeated Scores scores = 2;
+  repeated PowerUps powerUps = 3;
+  Notification notification = 4;
+  bool powerupUpdate = 5;
 }
 
-message Coordinate {
-  int32 x = 1;
-  int32 y = 2;
+
+
+message PixelUser {
+    int32 id = 1;
 }
 
-message User {
-  string id = 1;
+message RelativeCoordinate {
+    int32 x = 1;
+    int32 y = 2;
 }
 
 enum PixelTypes {
@@ -68,7 +76,7 @@ enum PixelTypes {
   Spawn = 2;
   FogOfWar = 3;
 }
-
+ 
 enum PixelGuild {
   Nobody = 0;
   Tietokilta = 1;

@@ -1,8 +1,9 @@
 <script lang="ts">
   import { claimPixel } from '$lib/client/pixel'
   import type { LocalPixel } from '$lib/types/LocalGame'
+  import { PIXEL_SIZE } from '$lib/utils/constants'
   import { Viewport } from 'pixi-viewport'
-  import { Application, Container } from 'pixi.js'
+  import { Application, Container, FederatedPointerEvent } from 'pixi.js'
   import { game } from '../states/game.svelte'
   import { users } from '../states/users.svelte'
   import Pixel from './Pixel.svelte'
@@ -15,6 +16,29 @@
   let viewport: Viewport
 
   let pixels = new Container()
+
+  let isDragging = false
+
+  $effect(() => {
+    if (!viewport) return
+
+    // Set up drag detection events
+    const handleDragStart = () => {
+      isDragging = true
+    }
+
+    const handleDragEnd = () => {
+      isDragging = false
+    }
+
+    viewport.on('drag-start', handleDragStart)
+    viewport.on('drag-end', handleDragEnd)
+
+    return () => {
+      viewport.off('drag-start', handleDragStart)
+      viewport.off('drag-end', handleDragEnd)
+    }
+  })
 
   $effect(() => {
     app
@@ -37,6 +61,7 @@
 
         viewport.drag().pinch().wheel().decelerate()
         viewport.addChild(pixels)
+        pixels.interactiveChildren = false
 
         console.log('app initialized')
       })
@@ -44,6 +69,54 @@
     return () => {
       console.log('destroying app')
       app.destroy()
+    }
+  })
+
+  const getPixelFromEvent = (e: FederatedPointerEvent): LocalPixel | undefined => {
+    if (isDragging) return
+
+    const gridSize = PIXEL_SIZE
+    const world = viewport.toWorld(e.data.global.x, e.data.global.y)
+    const x = Math.floor(world.x / gridSize)
+    const y = Math.floor(world.y / gridSize)
+    return game.pixels[y + game.playerSpawn.y]?.[x + game.playerSpawn.x]
+  }
+
+  $effect(() => {
+    if (!game.pixels || !viewport) return
+
+    const handleMove = async (e: FederatedPointerEvent) => {
+      const pixel = getPixelFromEvent(e)
+
+      if (!pixel?.owner && game.highlightedUser) {
+        game.highlightedUser = undefined
+      } else if (pixel && pixel.owner) {
+        game.highlightedUser = pixel.owner
+      }
+    }
+
+    // On mouse hover show the pixel info
+    viewport.on('mousemove', handleMove)
+
+    return () => {
+      viewport.off('mousemove', handleMove)
+    }
+  })
+
+  $effect(() => {
+    if (!game.pixels || !viewport) return
+
+    const handleOnClick = (e: FederatedPointerEvent) => {
+      const pixel = getPixelFromEvent(e)
+      if (!pixel) return
+
+      handleClick(pixel)
+    }
+
+    viewport.on('click', handleOnClick)
+
+    return () => {
+      viewport.off('click', handleOnClick)
     }
   })
 
@@ -84,9 +157,9 @@
   }
 </script>
 
-{#each game.pixels as row, rowIndex}
-  {#each row as pixel, colIndex}
-    <Pixel {pixel} container={pixels} onClick={handleClick} />
+{#each game.pixels as row, rowIndex (rowIndex)}
+  {#each row as pixel, colIndex (colIndex)}
+    <Pixel {pixel} container={pixels} {app} />
   {/each}
 {/each}
 
