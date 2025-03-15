@@ -48,6 +48,7 @@ export const renderPixel = ({ container, pixel, currentUserId, hovering, app }: 
   switch (pt) {
     case PixelTypes.Spawn:
       text.text = `S${pixel.guild}`
+      if (!pixel.guild) console.log(JSON.stringify(pixel))
       if (ownPixel) {
         text.style.fill = '#ff0000'
       }

@@ -24,7 +24,32 @@ export const GET: RequestHandler = async (req) => {
       credentials: 'include'
     })
 
-    const data = (await res.json()) as {
+    // Check content type to ensure it's actually JSON
+    const contentType = res.headers.get('content-type')
+    if (!contentType || !contentType.includes('application/json')) {
+      console.error(`Unexpected content type: ${contentType}`)
+      throw new Error(`API returned non-JSON response: ${contentType}`)
+    }
+
+    let json
+
+    // If the response is huge (over 15MB) we will use streams
+    const contentLength = res.headers.get('content-length')
+    if (contentLength && parseInt(contentLength, 10) > 15 * 1024 * 1024) {
+      console.log(`Huge request detected (size: ${contentLength}). Streaming it straight trough.`)
+
+      return new Response(res.body, {
+        status: res.status,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+    } else {
+      json = await res.json()
+    }
+
+    // Parse
+    const data = json as {
       pixels: (ServerPixel & { backgroundGraphic?: string })[][]
       playerSpawn: PlayerSpawn
     }

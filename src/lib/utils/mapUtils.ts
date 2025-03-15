@@ -36,7 +36,11 @@ export const getSpawnPoints = (serverMap: ServerGame): Map<number, [number, numb
   const spawnPoints = new Map<number, [number, number]>()
   serverMap.pixels.forEach((row, i) => {
     row.forEach((pixel, j) => {
-      if (pixel.type === PixelTypes.Spawn) {
+      if (pixel.type === PixelTypes.Spawn && pixel.owner !== 0) {
+        // Check if the spawn point is already taken
+        if (spawnPoints.has(pixel.owner)) {
+          console.log(`Spawn point ${pixel.owner} already taken`)
+        }
         spawnPoints.set(pixel.owner, [j, i])
       }
     })
@@ -166,7 +170,9 @@ export const resolveBigMap = (maps: [string, ServerGame][]): ServerGame[] => {
       // also add localSpawn to bigMapSpawns
       spawns.forEach((localSpawn, ownerId) => {
         const bigSpawn = [localSpawn[0] + offsetX, localSpawn[1] + offsetY] as [number, number]
-        bigMapSpawns.set(ownerId, bigSpawn)
+        if (!bigMapSpawns.has(ownerId)) {
+          bigMapSpawns.set(ownerId, bigSpawn)
+        }
       })
     }
 

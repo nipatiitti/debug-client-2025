@@ -41,6 +41,18 @@ export const getNewMap = async (token: string) => {
       throw new Error(`Failed to fetch map for ${token}`)
     }
 
+    // If the response is huge (over 15MB) just return an empty object
+    const contentLength = res.headers.get('content-length')
+    if (contentLength && parseInt(contentLength, 10) > 15 * 1024 * 1024) {
+      console.log(`Huge request detected (size: ${contentLength}). Skipping it.`)
+      return {
+        pixels: [],
+        playerSpawn: { x: 0, y: 0 },
+        token,
+        lastUpdated: new Date()
+      } as DbGame
+    }
+
     // Check content type to ensure it's actually JSON
     const contentType = res.headers.get('content-type')
     if (!contentType || !contentType.includes('application/json')) {

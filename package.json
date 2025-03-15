@@ -16,6 +16,8 @@
     "@sveltejs/adapter-auto": "^3.0.0",
     "@sveltejs/kit": "^2.0.0",
     "@sveltejs/vite-plugin-svelte": "^4.0.0",
+    "@types/big-json": "^3.2.5",
+    "@types/stream-json": "^1.7.8",
     "autoprefixer": "^10.4.20",
     "grpc-web": "^1.5.0",
     "prettier": "^3.3.2",
@@ -31,9 +33,12 @@
   "dependencies": {
     "@types/google-protobuf": "^3.15.12",
     "@zerodevx/svelte-toast": "^0.9.6",
+    "big-json": "^3.2.0",
     "google-protobuf": "^3.21.4",
     "mongodb": "^6.14.2",
     "pixi-viewport": "^6.0.3",
-    "pixi.js": "^8.8.1"
+    "pixi.js": "^8.8.1",
+    "stream-chain": "^3.4.0",
+    "stream-json": "^1.9.1"
   }
 }
