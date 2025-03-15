@@ -41,10 +41,27 @@ export const getNewMap = async (token: string) => {
       throw new Error(`Failed to fetch map for ${token}`)
     }
 
-    const rawData = (await res.json()) as {
-      pixels: (ServerPixel & { backgroundGraphic?: string })[][]
-      playerSpawn: PlayerSpawn
-      token: string
+    // Check content type to ensure it's actually JSON
+    const contentType = res.headers.get('content-type')
+    if (!contentType || !contentType.includes('application/json')) {
+      console.error(`Unexpected content type: ${contentType}`)
+      throw new Error(`API returned non-JSON response: ${contentType}`)
+    }
+
+    // Get the text first to see what we're dealing with
+    const text = await res.text()
+    let rawData
+
+    try {
+      rawData = JSON.parse(text) as {
+        pixels: (ServerPixel & { backgroundGraphic?: string })[][]
+        playerSpawn: PlayerSpawn
+        token: string
+      }
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError)
+      console.error('Response text (truncated):', text.substring(0, 200) + '...')
+      throw new Error('Failed to parse API response as JSON')
     }
 
     // Strip out the backgroundGraphic to prevent BSON serialization issues

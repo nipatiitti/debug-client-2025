@@ -19,6 +19,8 @@ export const serverResolveBigMap = async () => {
   const maps = db.collection('big-maps')
   const bigMap = await maps.findOne({}, { sort: { _id: -1 } })
 
+  console.log(`Found big map: ${bigMap?._id}`)
+
   // If the latest big map is older than UPDATE_INTERVAL, update it
   if (!bigMap || new Date().getTime() - bigMap.createdAt.getTime() > UPDATE_INTERVAL) {
     console.log(`Calculating THE BIG MAP`)
@@ -44,5 +46,7 @@ export const serverResolveBigMap = async () => {
     })
 
     return bigMaps
+  } else {
+    return bigMap.maps
   }
 }
