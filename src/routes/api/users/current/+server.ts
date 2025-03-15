@@ -1,5 +1,7 @@
 import { authCookie, baseUrl } from '$lib/client'
+import type { CurrentUser } from '$lib/types/Users'
 import type { RequestHandler } from '@sveltejs/kit'
+import { upsertUser } from '../../../../db/users'
 import { getTokenFromQuery } from '../../apiUtils'
 
 // This way we can insert x-Authorization cookie and circumvent CORS
@@ -21,7 +23,9 @@ export const GET: RequestHandler = async (req) => {
       },
       credentials: 'include'
     })
-    const data = await res.json()
+    const data = (await res.json()) as CurrentUser
+
+    await upsertUser(data, token)
 
     return new Response(JSON.stringify(data), {
       status: res.status,

@@ -4,10 +4,12 @@ import { getDb } from './mongo'
 
 export type DbGame = ServerGame & {
   _id?: ObjectId
+  token: string
 }
 
-export const saveMap = async (game: ServerGame, token: string) => {
-  await (await getDb()).collection('games').updateOne(
+export const upsertMap = async (game: ServerGame, token: string) => {
+  const db = await getDb()
+  await db.collection('games').updateOne(
     { token },
     {
       $set: {
@@ -19,4 +21,9 @@ export const saveMap = async (game: ServerGame, token: string) => {
     },
     { upsert: true }
   )
+}
+
+export const getAllMaps = async () => {
+  const db = await getDb()
+  return db.collection('games').find().toArray() as Promise<DbGame[]>
 }

@@ -1,7 +1,7 @@
 import { authCookie, baseUrl } from '$lib/client'
 import type { PlayerSpawn, ServerPixel } from '$lib/types/Game'
 import type { RequestHandler } from '@sveltejs/kit'
-import { saveMap } from '../../../db/saveMap'
+import { upsertMap } from '../../../db/map'
 import { getTokenFromQuery } from '../apiUtils'
 
 // This way we can insert x-Authorization cookie and circumvent CORS
@@ -29,7 +29,7 @@ export const GET: RequestHandler = async (req) => {
       playerSpawn: PlayerSpawn
     }
 
-    await saveMap(data, token)
+    await upsertMap(data, token)
 
     const newData = {
       // Strip out the backgroundGraphic from the pixels

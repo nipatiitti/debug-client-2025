@@ -32,20 +32,38 @@
   }
 
   const startIncrementalUpdates = async () => {
-    getIncrementalMapUpdate(token, (newPixel) => {
-      const coords = {
-        x: newPixel.x + game.playerSpawn.x,
-        y: newPixel.y + game.playerSpawn.y
+    const reconnect = async (streamFn: () => Promise<void>, name: string) => {
+      while (true) {
+        try {
+          console.log(`Starting ${name} stream...`)
+          await streamFn()
+          console.log(`${name} stream ended, reconnecting...`)
+        } catch (error) {
+          console.error(`Error in ${name} stream:`, error)
+        }
       }
+    }
 
-      if (game.pixels[coords.y] === undefined) {
-        game.pixels[coords.y] = []
-      }
+    // Start map updates with reconnection
+    reconnect(
+      () =>
+        getIncrementalMapUpdate(token, (newPixel) => {
+          const coords = {
+            x: newPixel.x + game.playerSpawn.x,
+            y: newPixel.y + game.playerSpawn.y
+          }
 
-      game.pixels[newPixel.y + game.playerSpawn.y][newPixel.x + game.playerSpawn.x] = newPixel
-    })
+          if (game.pixels[coords.y] === undefined) {
+            game.pixels[coords.y] = []
+          }
 
-    getMiscUpdate(token)
+          game.pixels[newPixel.y + game.playerSpawn.y][newPixel.x + game.playerSpawn.x] = newPixel
+        }),
+      'map update'
+    )
+
+    // Start misc updates with reconnection
+    reconnect(() => getMiscUpdate(token), 'misc update')
   }
 
   $effect(() => {
@@ -58,7 +76,9 @@
   })
 </script>
 
-<Game {token} />
+<div class="h-[100vh] w-[100vw]">
+  <Game {token} pixels={game.pixels} />
+</div>
 
 <GuildColors />
 <PixelBucket />

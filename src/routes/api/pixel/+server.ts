@@ -4,8 +4,8 @@ import type { RequestHandler } from '@sveltejs/kit'
 export const POST: RequestHandler = async (req) => {
   try {
     const { x, y, token } = await req.request.json()
-    if (!x || !y || !token) {
-      return new Response(JSON.stringify({ error: 'Missing x, y or' }), {
+    if (x === undefined || y === undefined || !token) {
+      return new Response(JSON.stringify({ error: 'Missing x, y or token' }), {
         status: 400,
         headers: {
           'Content-Type': 'application/json'

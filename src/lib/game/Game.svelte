@@ -6,39 +6,18 @@
   import { Application, Container, FederatedPointerEvent } from 'pixi.js'
   import { game } from '../states/game.svelte'
   import { users } from '../states/users.svelte'
-  import Pixel from './Pixel.svelte'
+  import { renderPixel } from './renderPixel'
 
-  let { token }: { token: string } = $props()
+  let { token, pixels }: { token?: string; pixels: LocalPixel[][] } = $props()
 
   let container: HTMLDivElement
 
   let app = new Application()
-  let viewport: Viewport
+  let viewport = $state<Viewport>()
 
-  let pixels = new Container()
+  let pixelsContainer = new Container()
 
   let isDragging = false
-
-  $effect(() => {
-    if (!viewport) return
-
-    // Set up drag detection events
-    const handleDragStart = () => {
-      isDragging = true
-    }
-
-    const handleDragEnd = () => {
-      isDragging = false
-    }
-
-    viewport.on('drag-start', handleDragStart)
-    viewport.on('drag-end', handleDragEnd)
-
-    return () => {
-      viewport.off('drag-start', handleDragStart)
-      viewport.off('drag-end', handleDragEnd)
-    }
-  })
 
   $effect(() => {
     app
@@ -60,51 +39,80 @@
         app.stage.addChild(viewport)
 
         viewport.drag().pinch().wheel().decelerate()
-        viewport.addChild(pixels)
-        pixels.interactiveChildren = false
+        viewport.addChild(pixelsContainer)
+        pixelsContainer.interactiveChildren = false
+
+        viewport.on('drag-start', handleDragStart)
+        viewport.on('drag-end', handleDragEnd)
+
+        viewport.on('mousemove', handleMove)
 
         console.log('app initialized')
       })
 
     return () => {
       console.log('destroying app')
+
+      viewport?.off('drag-start', handleDragStart)
+      viewport?.off('drag-end', handleDragEnd)
+      viewport?.off('mousemove', handleMove)
+
       app.destroy()
     }
   })
 
+  const handleDragStart = () => {
+    isDragging = true
+  }
+
+  const handleDragEnd = () => {
+    isDragging = false
+  }
+
+  const handleMove = async (e: FederatedPointerEvent) => {
+    const pixel = getPixelFromEvent(e)
+
+    if (!pixel?.owner && game.highlightedUser) {
+      game.highlightedUser = undefined
+    } else if (pixel && pixel.owner) {
+      game.highlightedUser = pixel.owner
+    }
+  }
+
+  $effect(() => {
+    if (!pixels || !viewport) return
+
+    pixelsContainer.removeChildren()
+
+    pixels.forEach((row, rowIndex) => {
+      row.forEach((pixel, colIndex) => {
+        renderPixel({
+          pixel,
+          app,
+          container: pixelsContainer,
+          currentUserId: users.currentUser?.id,
+          hovering: (game.highlightedUser && game.highlightedUser === pixel.owner) || false
+        })
+      })
+    })
+
+    return () => {
+      pixelsContainer.removeChildren()
+    }
+  })
+
   const getPixelFromEvent = (e: FederatedPointerEvent): LocalPixel | undefined => {
-    if (isDragging) return
+    if (isDragging || !viewport) return
 
     const gridSize = PIXEL_SIZE
     const world = viewport.toWorld(e.data.global.x, e.data.global.y)
     const x = Math.floor(world.x / gridSize)
     const y = Math.floor(world.y / gridSize)
-    return game.pixels[y + game.playerSpawn.y]?.[x + game.playerSpawn.x]
+    return pixels[y + game.playerSpawn.y]?.[x + game.playerSpawn.x]
   }
 
   $effect(() => {
-    if (!game.pixels || !viewport) return
-
-    const handleMove = async (e: FederatedPointerEvent) => {
-      const pixel = getPixelFromEvent(e)
-
-      if (!pixel?.owner && game.highlightedUser) {
-        game.highlightedUser = undefined
-      } else if (pixel && pixel.owner) {
-        game.highlightedUser = pixel.owner
-      }
-    }
-
-    // On mouse hover show the pixel info
-    viewport.on('mousemove', handleMove)
-
-    return () => {
-      viewport.off('mousemove', handleMove)
-    }
-  })
-
-  $effect(() => {
-    if (!game.pixels || !viewport) return
+    if (!game.pixels || !viewport || !token) return
 
     const handleOnClick = (e: FederatedPointerEvent) => {
       const pixel = getPixelFromEvent(e)
@@ -116,7 +124,7 @@
     viewport.on('click', handleOnClick)
 
     return () => {
-      viewport.off('click', handleOnClick)
+      viewport?.off('click', handleOnClick)
     }
   })
 
@@ -140,6 +148,7 @@
   }
 
   const handleClick = (pixel: LocalPixel) => {
+    if (!token) return
     // Make sure this pixel is valid for claiming aka we
     // are not the owner and it has atleast one adjacent pixel owned by us
     const aps = checkForAdjacentOwnedPixels(pixel)
@@ -157,10 +166,10 @@
   }
 </script>
 
-{#each game.pixels as row, rowIndex (rowIndex)}
+<!-- {#each game.pixels as row, rowIndex (rowIndex)}
   {#each row as pixel, colIndex (colIndex)}
     <Pixel {pixel} container={pixels} {app} />
   {/each}
-{/each}
+{/each} -->
 
-<div bind:this={container} class="game h-[100vh] w-[100vw]"></div>
+<div bind:this={container} class="game h-full w-full"></div>
