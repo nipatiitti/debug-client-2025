@@ -32,6 +32,9 @@ export const getIncrementalMapUpdate = async (token: string, onPixelUpdate: (pix
 
           onPixelUpdate(JSON.parse(JSON.stringify(localPixel)))
         }
+
+        // Clear updates array
+        response.clearUpdatesList()
       }, 0)
     })
 
