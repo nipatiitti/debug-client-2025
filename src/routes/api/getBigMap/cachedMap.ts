@@ -12,7 +12,7 @@ type serverBigMap = {
 
 const UPDATE_INTERVAL = 1000 * 30 // 30 seconds
 
-const serverResolveBigMap = async () => {
+export const serverResolveBigMap = async () => {
   const db = await getDb()
 
   // Find the latest big map from db

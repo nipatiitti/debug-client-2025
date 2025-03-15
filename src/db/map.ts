@@ -78,17 +78,17 @@ export const getFreshMaps = async () => {
   const db = await getDb()
   const maps = (await db.collection('games').find().toArray()) as DbGame[]
 
-  // Make sure the maps are not stale and get new ones if they are
-  const freshMaps = await Promise.all(
-    maps.map(async (map) => {
-      if (new Date().getTime() - map.lastUpdated.getTime() > STALE) {
-        console.log(`Map ${map.token.split('.')[1]} is stale, fetching new one`)
-        return await getNewMap(map.token)
-      }
-      return map
-    })
-  )
+  // Check for stale maps but return the existing ones immediately
+  maps.forEach((map) => {
+    if (new Date().getTime() - map.lastUpdated.getTime() > STALE) {
+      console.log(`Map ${map.token.split('.')[1]} is stale, updating in background`)
+      // Fire and forget - update in the background
+      getNewMap(map.token).catch((err) =>
+        console.error(`Background update failed for map ${map.token.split('.')[1]}:`, err)
+      )
+    }
+  })
 
-  console.log(`Found ${freshMaps.length} fresh maps`)
-  return freshMaps
+  console.log(`Returning ${maps.length} maps (background refresh if needed)`)
+  return maps
 }
